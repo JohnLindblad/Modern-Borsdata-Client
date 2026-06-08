@@ -129,6 +129,70 @@ Add to your MCP client configuration (e.g., Claude Desktop's config):
 }
 ```
 
+## Remote / HTTP deployment
+
+The server also ships an optional **streamable-HTTP** transport so it can be
+self-hosted as a remote MCP connector (Docker, Coolify, any container host)
+and shared across devices. The stdio entrypoint is unchanged and remains the
+default; the HTTP entrypoint is a separate module and its dependencies are
+isolated in `requirements-http.txt`.
+
+### Install HTTP extras
+
+```bash
+pip install -r requirements.txt -r requirements-http.txt
+```
+
+### Run
+
+```bash
+export BORSDATA_API_KEY="your_api_key_here"
+PYTHONPATH=src python -m mcp_server.http_app
+```
+
+Or with an external ASGI server:
+
+```bash
+PYTHONPATH=src uvicorn mcp_server.http_app:app --host 0.0.0.0 --port 8000
+```
+
+Endpoints:
+
+- `GET /health` → `200 ok` (used by the Docker `HEALTHCHECK`).
+- `POST/GET /mcp/` → MCP streamable-HTTP endpoint. The canonical client URL
+  uses the trailing slash, e.g. `https://your-host.example.com/mcp/`.
+
+### Docker
+
+A `Dockerfile` is included. Build and run with:
+
+```bash
+docker build -t borsdata-mcp .
+docker run --rm -p 8000:8000 \
+  -e BORSDATA_API_KEY="your_api_key_here" \
+  -e MCP_ALLOWED_HOSTS="your-host.example.com" \
+  borsdata-mcp
+```
+
+### Environment variables
+
+| Var | Required | Default | Behavior |
+|-----|----------|---------|----------|
+| `BORSDATA_API_KEY` | yes | — | Börsdata API key. Server refuses to start without it. |
+| `PORT` | no | `8000` | uvicorn listen port. |
+| `HOST` | no | `0.0.0.0` | uvicorn bind address. |
+| `MCP_AUTH_TOKEN` | no | unset | If set, require `Authorization: Bearer <token>` on `/mcp`. |
+| `MCP_ALLOWED_HOSTS` | conditionally | empty | Comma-separated Host allowlist. Needed behind a proxy unless protection is disabled. |
+| `MCP_ALLOWED_ORIGINS` | no | empty | Comma-separated Origin allowlist (browser clients). |
+| `MCP_DISABLE_DNS_REBINDING_PROTECTION` | no | `false` | `1/true/yes/on` disables Host/Origin checks entirely. |
+| `MCP_JSON_RESPONSE` | no | `false` | `1/true` → JSON responses instead of SSE streams. |
+| `MCP_STATELESS` | no | `false` | `1/true` → stateless sessions. |
+| `LOG_LEVEL` | no | `INFO` | Python log level. |
+
+> DNS-rebinding protection is **on** by default with an empty allowlist, which
+> rejects requests behind a reverse proxy. Either set `MCP_ALLOWED_HOSTS` to
+> your public host(s) or set `MCP_DISABLE_DNS_REBINDING_PROTECTION=1`.
+
 ### Example Tool Usage
 
 Once connected, AI assistants can use tools like:
