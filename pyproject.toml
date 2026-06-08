@@ -37,10 +37,10 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/modern-borsdata-client"
-"Bug Tracker" = "https://github.com/yourusername/modern-borsdata-client/issues"
-"Documentation" = "https://github.com/yourusername/modern-borsdata-client#readme"
-"Source Code" = "https://github.com/yourusername/modern-borsdata-client"
+"Homepage" = "https://github.com/JohnLindblad/Modern-Borsdata-Client"
+"Bug Tracker" = "https://github.com/JohnLindblad/Modern-Borsdata-Client/issues"
+"Documentation" = "https://github.com/JohnLindblad/Modern-Borsdata-Client#readme"
+"Source Code" = "https://github.com/JohnLindblad/Modern-Borsdata-Client"
 
 [tool.black]
 line-length = 88
