@@ -85,6 +85,11 @@ def main() -> None:
         app,
         host=os.environ.get("HOST", "0.0.0.0"),
         port=int(os.environ.get("PORT", "8000")),
+        proxy_headers=True,
+        # Behind Coolify/Traefik/etc., the proxy IP isn't 127.0.0.1, so uvicorn
+        # ignores X-Forwarded-Proto by default and builds http:// redirects for
+        # https:// requests. Trust the headers from any proxy hop.
+        forwarded_allow_ips=os.environ.get("FORWARDED_ALLOW_IPS", "*"),
     )
 
 
